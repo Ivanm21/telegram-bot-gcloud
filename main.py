@@ -45,7 +45,7 @@ def echo(update, context):
 def setup(token):
     # Create bot, update queue and dispatcher instances
     bot = telegram.Bot(token=token)
-    dispatcher = Dispatcher(bot, None, workers=0)
+    dispatcher = Dispatcher(bot, None, workers=0, use_context=True)
     
     ##### Register handlers here #####
     echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
@@ -57,7 +57,7 @@ def setup(token):
 def webhook(request):
     
     if request.method == "POST":
-        update = telegram.Update.de_json(request.get_json(force=True), bot)
+        update = telegram.Update.de_json(request.get_json(force=True), dispatcher.bot)
         dispatcher.put(update)
     
     return 'ok'
