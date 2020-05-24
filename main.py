@@ -51,6 +51,11 @@ def setup():
 
 
 def webhook(request):
+
+    token = access_secret_version(project_id,secret_id )
+    bot = telegram.Bot(token=token)
+
+    dispatcher = setup()
     
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), bot)
@@ -61,7 +66,3 @@ def webhook(request):
 
 
 
-token = access_secret_version(project_id,secret_id )
-bot = telegram.Bot(token=token)
-
-dispatcher = setup()
