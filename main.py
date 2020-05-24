@@ -1,5 +1,7 @@
 import os
 import telegram
+from telegram.ext import Dispatcher
+from telegram.ext import MessageHandler, Filters
 
 
 project_id = '122310846920'
@@ -30,14 +32,28 @@ def access_secret_version(project_id, secret_id, version_id='latest'):
     payload = response.payload.data.decode('UTF-8')
     return payload
 
+def echo(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+
+
+def setup(token):
+    # Create bot, update queue and dispatcher instances
+    bot = telegram.Bot(token=token)
+    
+    dispatcher = Dispatcher(bot, None, workers=0)
+    
+    ##### Register handlers here #####
+    echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
+    dispatcher.add_handler(echo_handler)
+
+    
+    return dispatcher
+
+
+def webhook(update):
+    dispatcher.process_update(update)
+
+
 
 token = access_secret_version(project_id,secret_id )
-bot = telegram.Bot(token=token)
-
-def webhook(request):
-    if request.method == "POST":
-        update = telegram.Update.de_json(request.get_json(force=True), bot)
-        chat_id = update.message.chat.id
-        # Reply with the same message
-        bot.sendMessage(chat_id=chat_id, text=update.message.text)
-    return "ok ok"
+dispatcher = setup(token)
