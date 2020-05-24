@@ -60,7 +60,7 @@ def webhook(request):
 
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), dispatcher.bot)
-        dispatcher.put(update)
+        dispatcher.process_update(update)
     
     return 'ok'
     
