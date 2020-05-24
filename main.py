@@ -55,14 +55,15 @@ def setup(token):
 
 
 def webhook(request):
-    
+    token = access_secret_version(project_id,secret_id )
+    dispatcher  = setup(token)
+
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), dispatcher.bot)
         dispatcher.put(update)
     
     return 'ok'
     
-token = access_secret_version(project_id,secret_id )
-dispatcher  = setup(token)
+
 
 
