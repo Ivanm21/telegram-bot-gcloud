@@ -1,4 +1,6 @@
 import os
+import logging
+
 import telegram
 from telegram.ext import Dispatcher
 from telegram.ext import MessageHandler, Filters
@@ -6,6 +8,9 @@ from telegram.ext import MessageHandler, Filters
 
 project_id = '122310846920'
 secret_id = 'TELEGRAM_TOKEN'
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                     level=logging.INFO)
 
 def access_secret_version(project_id, secret_id, version_id='latest'):
     """
@@ -37,7 +42,7 @@ def echo(update, context):
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=text_to_send)
 
 
-def setup():
+def setup(bot):
     # Create bot, update queue and dispatcher instances
     
     dispatcher = Dispatcher(bot, None, workers=0)
@@ -55,7 +60,7 @@ def webhook(request):
     token = access_secret_version(project_id,secret_id )
     bot = telegram.Bot(token=token)
 
-    dispatcher = setup()
+    dispatcher = setup(bot)
     
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), bot)
