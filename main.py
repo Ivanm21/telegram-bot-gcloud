@@ -39,34 +39,30 @@ def access_secret_version(project_id, secret_id, version_id='latest'):
 
 def echo(update, context):
     text_to_send = f'What do you mean: {update.message.text}?'
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=text_to_send)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=text_to_send)
 
 
-def setup(bot):
+def setup(token):
     # Create bot, update queue and dispatcher instances
-    
+    bot = telegram.Bot(token=token)
     dispatcher = Dispatcher(bot, None, workers=0)
     
     ##### Register handlers here #####
     echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
     dispatcher.add_handler(echo_handler)
-
-    
+   
     return dispatcher
 
 
 def webhook(request):
-
     
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), bot)
-        dispatcher.process_update(update)
+        dispatcher.put(update)
     
     return 'ok'
     
 token = access_secret_version(project_id,secret_id )
-bot = telegram.Bot(token=token)
-
-dispatcher = setup(bot)
+dispatcher  = setup(token)
 
 
