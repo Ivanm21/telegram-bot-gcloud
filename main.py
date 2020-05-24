@@ -40,4 +40,4 @@ def webhook(request):
         chat_id = update.message.chat.id
         # Reply with the same message
         bot.sendMessage(chat_id=chat_id, text=update.message.text)
-    return "ok"
+    return "ok ok"
