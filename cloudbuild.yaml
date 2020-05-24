@@ -1,4 +1,4 @@
 steps:
 - name: 'gcr.io/cloud-builders/gcloud'
-  args: ['functions', 'deploy', 'webhook', '--trigger-http', '--runtime', 'python37', '--trigger-http']
+  args: ['functions', 'deploy', 'webhook', '--runtime', 'python37', '--trigger-http']
   dir: 'functions/autodeploy'
