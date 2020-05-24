@@ -33,7 +33,7 @@ def access_secret_version(project_id, secret_id, version_id='latest'):
     return payload
 
 def echo(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=update.message.text)
 
 
 def setup(token):
