@@ -32,7 +32,7 @@ jobs:
         echo Add other actions to build,
         echo test, and deploy your project.
 
-    - name: Python Pylin GitHub Action
-      uses: fylein/python-pytest-github-action@v1
+    - name: Unit Testing With Python
+      uses: PrajjawalBanati/Python-actions@0.0.1
       with:
         args: pip3 install -r test/requirements-test.txt && pytest test/
