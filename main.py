@@ -12,6 +12,7 @@ secret_id = 'TELEGRAM_TOKEN'
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.DEBUG)
 
+
 def access_secret_version(project_id, secret_id, version_id='latest'):
     """
     Access the payload for the given secret version if one exists. The version
@@ -38,7 +39,7 @@ def access_secret_version(project_id, secret_id, version_id='latest'):
     return payload
 
 def echo(update, context):
-    text_to_send = f'What do you mean: {update.message.text}?'
+    text_to_send = f'{update.message.text}'
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_to_send)
 
 
@@ -55,8 +56,6 @@ def setup(token):
 
 
 def webhook(request):
-    token = access_secret_version(project_id,secret_id )
-    dispatcher  = setup(token)
 
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), dispatcher.bot)
@@ -65,5 +64,5 @@ def webhook(request):
     return 'ok'
     
 
-
-
+token = access_secret_version(project_id,secret_id )
+dispatcher  = setup(token)
