@@ -4,7 +4,7 @@ import logging
 import telegram
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import Dispatcher
-from telegram.ext import CommandHandler, MessageHandler, Filters, ConversationHandler
+from telegram.ext import (CommandHandler, MessageHandler, Filters, ConversationHandler,  PicklePersistence)
 
 
 project_id = '122310846920'
@@ -45,9 +45,9 @@ logger = logging.getLogger(__name__)
 
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
 
-reply_keyboard = [['Age', 'Favourite colour'],
-                  ['Number of siblings', 'Something else...'],
-                  ['Done']]
+reply_keyboard = [['Возраст', 'Любимый цвет'],
+                  ['Имя', 'Фамилия'],
+                  ['Все']]
 
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
@@ -66,13 +66,12 @@ def facts_to_str(user_data):
 
 
 def start(update, context):
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-
+    
     update.message.reply_text(
         'Привет! Шо там, давай рассказывай. '
         'Отправь /cancel что бы закончить .\n\n',
         reply_markup=markup)
-        
+         
 
     return CHOOSING
 
@@ -80,13 +79,14 @@ def regular_choice(update, context):
     text = update.message.text
     context.user_data['choice'] = text
     update.message.reply_text(
-        'Ты {}? ясно)'.format(text.lower()))
+        'Категория {}/n'
+        'Теперь введи значение'.format(text.lower()))
 
     return TYPING_REPLY
 
 def custom_choice(update, context):
     update.message.reply_text('Как хочешь. Тогда отправь категорию. '
-                              'например "я круто готовлю"')
+                              'например "Имя моего пса"')
 
     return TYPING_CHOICE
 
@@ -130,8 +130,10 @@ def error(update, context):
 
 def setup(token):
     # Create bot, update queue and dispatcher instances
+    pp = PicklePersistence(filename='conversationbot')
+
     bot = telegram.Bot(token=token)
-    dispatcher = Dispatcher(bot, None, workers=0, use_context=True)
+    dispatcher = Dispatcher(bot, None, workers=0, use_context=True, persistence=pp)
 
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
@@ -155,18 +157,16 @@ def setup(token):
         },
 
         fallbacks=[CommandHandler('cancel', cancel),
-                    MessageHandler(Filters.regex('^Done$'), done)]
+                    MessageHandler(Filters.regex('^Done$'), done)], 
+        name='my_conversation', 
+        persistent=True
     )
 
     dispatcher.add_handler(conv_handler)
 
     # log all errors
     dispatcher.add_error_handler(error)
-    
-    ##### Register handlers here #####
-    # echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
-    # dispatcher.add_handler(echo_handler)
-   
+       
     return dispatcher
 
 
