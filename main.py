@@ -135,7 +135,7 @@ def error(update, context):
 
 def setup(token):
     # Create bot, update queue and dispatcher instances
-    pp = PicklePersistence(filename='conversationbot')
+    pp = PicklePersistence(filename='/tmp/conversationbot')
 
     bot = telegram.Bot(token=token)
     dispatcher = Dispatcher(bot, None, workers=0, use_context=True, persistence=pp)
@@ -144,7 +144,7 @@ def setup(token):
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
-
+        allow_reentry = True,
         states={
             CHOOSING: [MessageHandler(Filters.regex('^(Возраст|Любимый цвет|Имя|Фамилия)$'),
                                       regular_choice),
