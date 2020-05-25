@@ -64,6 +64,10 @@ def facts_to_str(user_data):
 
     return "\n".join(facts).join(['\n', '\n'])
 
+def show_data(update, context):
+    update.message.reply_text("Вот что я про тебя знаю:"
+                              "{}".format(facts_to_str(context.user_data)))
+
 
 def start(update, context):
     
@@ -79,13 +83,13 @@ def regular_choice(update, context):
     text = update.message.text
     context.user_data['choice'] = text
     update.message.reply_text(
-        'Категория {}/n'
+        'Категория {}\n'
         'Теперь введи значение'.format(text.lower()))
 
     return TYPING_REPLY
 
 def custom_choice(update, context):
-    update.message.reply_text('Как хочешь. Тогда отправь категорию. '
+    update.message.reply_text('Как хочешь. Тогда отправь категорию.\n '
                               'например "Имя моего пса"')
 
     return TYPING_CHOICE
@@ -102,6 +106,7 @@ def received_information(update, context):
                               reply_markup=markup)
 
     return CHOOSING
+
 
 def done(update, context):
     user_data = context.user_data
@@ -157,7 +162,7 @@ def setup(token):
         },
 
         fallbacks=[CommandHandler('cancel', cancel),
-                    MessageHandler(Filters.regex('^Done$'), done)], 
+                    MessageHandler(Filters.regex('^Все$'), done)], 
         name='my_conversation', 
         persistent=True
     )
@@ -166,7 +171,10 @@ def setup(token):
 
     # log all errors
     dispatcher.add_error_handler(error)
-       
+    
+    show_data_handler = CommandHandler('show_data', show_data)
+    dispatcher.add_handler(show_data_handler)
+
     return dispatcher
 
 
