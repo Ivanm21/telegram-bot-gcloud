@@ -72,7 +72,7 @@ def start(update, context):
         'Привет! Шо там, давай рассказывай. '
         'Отправь /cancel что бы закончить .\n\n',
         reply_markup=markup)
-        )
+        
 
     return CHOOSING
 
