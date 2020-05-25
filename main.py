@@ -13,6 +13,7 @@ secret_id = 'TELEGRAM_TOKEN'
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.DEBUG)
 
+logger = logging.getLogger(__name__)
 
 def access_secret_version(project_id, secret_id, version_id='latest'):
     """
