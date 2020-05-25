@@ -10,11 +10,6 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, ConversationHa
 project_id = '122310846920'
 secret_id = 'TELEGRAM_TOKEN'
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                     level=logging.DEBUG)
-
-logger = logging.getLogger(__name__)
-
 def access_secret_version(project_id, secret_id, version_id='latest'):
     """
     Access the payload for the given secret version if one exists. The version
@@ -40,40 +35,90 @@ def access_secret_version(project_id, secret_id, version_id='latest'):
     payload = response.payload.data.decode('UTF-8')
     return payload
 
-GENDER, PHOTO, LOCATION, BIO = range(4)
+
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                     level=logging.DEBUG)
+
+logger = logging.getLogger(__name__)
+
+
+CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
+
+reply_keyboard = [['Age', 'Favourite colour'],
+                  ['Number of siblings', 'Something else...'],
+                  ['Done']]
+
+markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
 
 def echo(update, context):
     text_to_send = f'{update.message.text}'
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_to_send)
 
+def facts_to_str(user_data):
+    facts = list()
+
+    for key, value in user_data.items():
+        facts.append('{} - {}'.format(key, value))
+
+    return "\n".join(facts).join(['\n', '\n'])
+
 
 def start(update, context):
     reply_keyboard = [['Boy', 'Girl', 'Other']]
 
     update.message.reply_text(
-        'Hi! My name is Professor Bot. I will hold a conversation with you. '
-        'Send /cancel to stop talking to me.\n\n'
-        'Are you a boy or a girl?',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        'Привет! Шо там, давай рассказывай. '
+        'Отправь /cancel что бы закончить .\n\n',
+        reply_markup=markup)
         )
 
-    return GENDER
+    return CHOOSING
 
-def gender(update, context):
-    user = update.message.from_user
-    logger.info("Gender of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('I see! Please send me a photo of yourself, '
-                              'so I know what you look like, or send /skip if you don\'t want to.',
-                              reply_markup=ReplyKeyboardRemove())
+def regular_choice(update, context):
+    text = update.message.text
+    context.user_data['choice'] = text
+    update.message.reply_text(
+        'Ты {}? ясно)'.format(text.lower()))
 
-    return PHOTO
+    return TYPING_REPLY
 
+def custom_choice(update, context):
+    update.message.reply_text('Как хочешь. Тогда отправь категорию. '
+                              'например "я круто готовлю"')
+
+    return TYPING_CHOICE
+
+def received_information(update, context):
+    user_data = context.user_data
+    text = update.message.text
+    category = user_data['choice']
+    user_data[category] = text
+    del user_data['choice']
+
+    update.message.reply_text("Ок. Вот что ты мне уже известно:"
+                              "{} можешь рассказать еще или поменять что то".format(facts_to_str(user_data)),
+                              reply_markup=markup)
+
+    return CHOOSING
+
+def done(update, context):
+    user_data = context.user_data
+    if 'choice' in user_data:
+        del user_data['choice']
+
+    update.message.reply_text("Я знаю про тебя следующее"
+                              "{}"
+                              "Давай, пока!".format(facts_to_str(user_data)))
+
+    user_data.clear()
+    return ConversationHandler.END
 
 def cancel(update, context):
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
-    update.message.reply_text('Bye! I hope we can talk again some day.',
+    update.message.reply_text('Давай, пока!',
                               reply_markup=ReplyKeyboardRemove())
 
     return ConversationHandler.END
@@ -94,18 +139,23 @@ def setup(token):
         entry_points=[CommandHandler('start', start)],
 
         states={
-            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)]
+            CHOOSING: [MessageHandler(Filters.regex('^(Age|Favourite colour|Number of siblings)$'),
+                                      regular_choice),
+                       MessageHandler(Filters.regex('^Something else...$'),
+                                      custom_choice)
+                       ],
 
-            # PHOTO: [MessageHandler(Filters.photo, photo),
-            #         CommandHandler('skip', skip_photo)],
+            TYPING_CHOICE: [MessageHandler(Filters.text,
+                                           regular_choice)
+                            ],
 
-            # LOCATION: [MessageHandler(Filters.location, location),
-            #            CommandHandler('skip', skip_location)],
-
-            # BIO: [MessageHandler(Filters.text, bio)]
+            TYPING_REPLY: [MessageHandler(Filters.text,
+                                          received_information),
+                           ],
         },
 
-        fallbacks=[CommandHandler('cancel', cancel)]
+        fallbacks=[CommandHandler('cancel', cancel),
+                    MessageHandler(Filters.regex('^Done$'), done)]
     )
 
     dispatcher.add_handler(conv_handler)
