@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
 
 reply_keyboard = [['Возраст', 'Любимый цвет'],
-                  ['Имя', 'Фамилия'],
+                  ['Имя', 'Что то рандомное'],
                   ['Все']]
 
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
@@ -141,9 +141,9 @@ def setup(token):
         entry_points=[CommandHandler('start', start)],
 
         states={
-            CHOOSING: [MessageHandler(Filters.regex('^(Age|Favourite colour|Number of siblings)$'),
+            CHOOSING: [MessageHandler(Filters.regex('^(Возраст|Любимый цвет|Имя|Фамилия)$'),
                                       regular_choice),
-                       MessageHandler(Filters.regex('^Something else...$'),
+                       MessageHandler(Filters.regex('^Что то рандомное$'),
                                       custom_choice)
                        ],
 
