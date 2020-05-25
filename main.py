@@ -107,14 +107,14 @@ def setup(token):
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
-    dp.add_handler(conv_handler)
+    dispatcher.add_handler(conv_handler)
 
     # log all errors
-    dp.add_error_handler(error)
+    dispatcher.add_error_handler(error)
     
     ##### Register handlers here #####
-    echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
-    dispatcher.add_handler(echo_handler)
+    # echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
+    # dispatcher.add_handler(echo_handler)
    
     return dispatcher
 
